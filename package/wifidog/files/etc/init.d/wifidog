@@ -1,0 +1,157 @@
+#!/bin/sh /etc/rc.common
+# Copyright (C) 2006 OpenWrt.org
+
+START=65
+EXTRA_COMMANDS="status"
+EXTRA_HELP="        status Print the status of the service"
+
+PROG=/usr/bin/wifidog-init
+CONFFILE=/var/etc/wifidog.conf
+ACTUCONFFILE=/etc/wifidog.conf
+
+#wifidog - uci support init
+wifidog_symln_conffile_init(){
+	mkdir -p /var/etc
+	rm -f $CONFFILE
+	ln -nsf $CONFFILE $ACTUCONFFILE
+}
+
+wifidog_symln_conffile_rm(){
+	rm -f $ACTUCONFFILE
+}
+
+wifidog_add_main(){
+	local gw_id gw_interface gw_address gw_port
+	config_get gw_id $1 gatewayid
+	config_get gw_interface $1 gatewayinterface
+	config_get gw_address $1 gatewayaddress
+	config_get gw_port $1 gatewayport
+	echo "GatewayID $gw_id"
+	[ -n "$gw_id" ] && echo "GatewayID $gw_id" >> $CONFFILE
+	[ -n "$gw_interface" ] && echo "GatewayInterface $gw_interface" >>  $CONFFILE
+	[ -n "$gw_address" ] && echo "GatewayAddress $gw_address" >>  $CONFFILE
+	[ -n "$gw_port" ] && echo "GatewayPort $gw_port" >>  $CONFFILE
+
+	local proxyport externalinterface htmlmessagefile daemon checkinterval clienttimeout
+	config_get proxyport $1 proxyport
+	config_get externalinterface $1 externalinterface
+	config_get htmlmessagefile $1 htmlmessagefile
+	config_get_bool daemon $1 daemon
+	config_get checkinterval $1 checkinterval
+	config_get clienttimeout $1 clienttimeout
+	[ -n "$proxyport" ] && echo "ProxyPort $proxyport" >>  $CONFFILE
+	[ -n "$externalinterface" ] && echo "ExternalInterface $externalinterface" >>  $CONFFILE
+	[ -n "$htmlmessagefile" ] && echo "HTMLMessageFile $htmlmessagefile" >>  $CONFFILE
+	[  $daemon -gt 0 ] && echo "Daemon $daemon" >>  $CONFFILE
+	[ -n "$checkinterval" ] && echo "CheckInterval $checkinterval" >>  $CONFFILE
+	[ -n "$clienttimeout" ] && echo "ClientTimeout $clienttimeout" >>  $CONFFILE
+
+	local httpd_name httpd_maxconn httpd_realm httpd_username httpd_password
+	config_get httpd_name $1 httpdname
+	config_get httpd_maxconn $1 httpdmaxconn
+	config_get httpd_realm $1 httpdrealm
+	config_get httpd_username $1 httpdusername
+	config_get httpd_password $1 httpdpassword
+	[ -n "$httpd_name" ] && echo "HTTPDName $httpd_name" >>  $CONFFILE
+	[ -n "$httpd_maxconn" ] && echo "HTTPDMaxConn $httpd_maxconn" >>  $CONFFILE
+	[ -n "$httpd_realm" ] && echo "HTTPDRealm $httpd_realm" >>  $CONFFILE
+	[ -n "$httpd_username" ] && echo "HTTPDUserName $httpd_username" >>  $CONFFILE
+	[ -n "$httpd_password" ] && echo "HTTPDPassword $httpd_password" >>  $CONFFILE
+}
+
+wifidog_add_trustedmaclist(){
+	local trustedmaclist macaddr
+	config_get trustedmaclist $1 macaddr
+	for macaddr in $trustedmaclist; do
+		[ -n "$macaddr" ] && echo "TrustedMACList $macaddr" >> $CONFFILE
+	done
+
+	#local trustedmaclist trustedmac
+	#config_get trustedmaclist "$sec_main" trustedmaclist
+	#if [ -n trustedmaclist  ]; then
+	#	echo -n "TrustedMACList "
+	#	for trustedmac in $trustedmaclist; do
+	#		[ -n "$trustedmac" ] && echo -n "$trustedmac," >> $CONFFILE
+	#	done
+	#	echo -e "\n"
+	#fi
+}
+
+wifidog_add_authserver(){
+	local hostname ssl_available ssl_port http_port 
+	local path_root path_login path_portal path_msg path_ping path_auth
+
+	config_get hostname $1 hostname
+	config_get_bool ssl_available $1 sslavailable
+	config_get ssl_port $1 sslport
+	config_get http_port $1 httpport
+	config_get path_root $1 path
+	config_get path_login $1 loginscriptpathfragment
+	config_get path_portal $1 portalscriptpathfragment
+	config_get path_msg $1 msgscriptpathfragment
+	config_get path_ping $1 pingscriptpathfragment
+	config_get path_auth $1 authscriptpathfragment
+
+	echo "AuthServer {" >>  $CONFFILE
+	[ -n "$hostname" ] && echo "    Hostname $hostname" >>  $CONFFILE
+	[  $ssl_available -gt 0  ] && echo "    SSLAvailable $ssl_available" >>  $CONFFILE
+	[ -n "$ssl_port" ] && echo "    SSLPort $ssl_port" >>  $CONFFILE
+	[ -n "$http_port" ] && echo "    HTTPPort $http_port" >>  $CONFFILE
+	[ -n "$path_root" ] && echo "    Path $path_root" >>  $CONFFILE
+	[ -n "$path_login" ] && echo "    LoginScriptPathFragment $path_login" >>  $CONFFILE
+	[ -n "$path_portal" ] && echo "    PortalScriptPathFragment $path_portal" >>  $CONFFILE
+	[ -n "$path_msg" ] && echo "    MsgScriptPathFragment $path_msg" >>  $CONFFILE
+	[ -n "$path_ping" ] && echo "    PingScriptPathFragment $path_ping" >>  $CONFFILE
+	[ -n "$path_auth" ] && echo "    AuthScriptPathFragment $path_auth" >>  $CONFFILE
+	echo "}" >>  $CONFFILE
+}
+
+wifidog_add_firewallrule(){
+	[ -n "$1" ] && echo "    FirewallRule $1" >> $CONFFILE
+}
+
+wifidog_add_firewallruleset(){
+	#local firewallrules 
+	# local rule
+	# config_get firewallrules $1  rule
+
+	case $1 in
+		global) echo "FirewallRuleSet global {" >> $CONFFILE;;
+		validating_users) echo "FirewallRuleSet validating-users {" >> $CONFFILE;;
+		known_users) echo "FirewallRuleSet known-users {" >> $CONFFILE;;
+		unknown_users) echo "FirewallRuleSet unknown-users {" >> $CONFFILE;;
+		locked_users) echo "FirewallRuleSet locked-users {" >> $CONFFILE;;
+	esac
+
+	config_list_foreach $1 rule wifidog_add_firewallrule
+
+	#for rule in $firewallrules; do
+	#	echo "    FirewallRule $rule"
+	#	[ -n "$rule" ] && echo "    FirewallRule $rule" >> $CONFFILE
+	#done
+	echo "}" >> $CONFFILE
+}
+
+start() {
+
+	wifidog_symln_conffile_init
+	config_load wifidog
+	config_foreach wifidog_add_main main
+	config_foreach wifidog_add_trustedmaclist trustedmaclist
+	config_foreach wifidog_add_authserver authserver
+	config_foreach wifidog_add_firewallruleset firewallruleset
+
+	$PROG start
+
+	wifidog_symln_conffile_rm
+}
+
+
+
+stop() {
+	$PROG stop
+}
+
+status() {
+	$PROG status
+}
