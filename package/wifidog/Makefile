@@ -5,9 +5,9 @@ PKG_VERSION:=20140901
 PKG_RELEASE=$(PKG_SOURCE_VERSION)
 
 PKG_SOURCE_PROTO:=git
-PKG_SOURCE_URL:=git://github.com/wifidog/wifidog-gateway.git
+PKG_SOURCE_URL:=git://github.com/zCookie/openwrtset.git
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
-PKG_SOURCE_VERSION:=00ab48ba2ca8d0ace26512c494e4b2b686b87c49
+PKG_SOURCE_VERSION:=undefined
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_SOURCE_VERSION).tar.gz
 
 PKG_FIXUP:=autoreconf
