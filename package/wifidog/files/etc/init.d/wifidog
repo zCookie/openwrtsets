@@ -8,6 +8,7 @@ EXTRA_HELP="        status Print the status of the service"
 PROG=/usr/bin/wifidog-init
 CONFFILE=/var/etc/wifidog.conf
 ACTUCONFFILE=/etc/wifidog.conf
+WD_GATEWAYINTERFACE="br-lan"
 
 #wifidog - uci support init
 wifidog_symln_conffile_init(){
@@ -31,6 +32,7 @@ wifidog_add_main(){
 	[ -n "$gw_interface" ] && echo "GatewayInterface $gw_interface" >>  $CONFFILE
 	[ -n "$gw_address" ] && echo "GatewayAddress $gw_address" >>  $CONFFILE
 	[ -n "$gw_port" ] && echo "GatewayPort $gw_port" >>  $CONFFILE
+	WD_GATEWAYINTERFACE=gw_interface
 
 	local proxyport externalinterface htmlmessagefile daemon checkinterval clienttimeout
 	config_get proxyport $1 proxyport
@@ -164,8 +166,8 @@ wifidog_alloweddomains_patch(){
 	echo "[wifidog]alloweddomains - Patching..."
 	echo "[wifidog]alloweddomains - Required kernel: kmod-ipt-ipset; package: ipset dnsmasq-full"
 	
-	iptables -t nat -A WiFiDog_br-lan_Global -m set --match-set $DNSMASQ_SYM_IPSET dst,src -j ACCEPT
-	iptables -t filter -A WiFiDog_br-lan_Global -m set --match-set $DNSMASQ_SYM_IPSET dst,src -j ACCEPT
+	iptables -t nat -A WiFiDog_$WD_GATEWAYINTERFACE_Global -m set --match-set $DNSMASQ_SYM_IPSET dst,src -j ACCEPT
+	iptables -t filter -A WiFiDog_$WD_GATEWAYINTERFACE_Global -m set --match-set $DNSMASQ_SYM_IPSET dst,src -j ACCEPT
 
 	rm -f $DNSMASQ_WIFIDOG_FILE
 	touch $DNSMASQ_WIFIDOG_FILE
