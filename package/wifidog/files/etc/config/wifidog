@@ -198,6 +198,27 @@ config authserver serv_blabla
     option authscriptpathfragment "auth/?"
 
 
+config alloweddomains gtabbs                      
+    list domain www.gtabbs.com                
+    list domain gtabbs.com                        
+                                                  
+config alloweddomains youku                   
+    list domain .youku.com                        
+    list domain youku.com                         
+    list domain www.youku.com                     
+    list domain v.youku.com                       
+    list domain k.youku.com                       
+                                              
+config alloweddomains qq                          
+    list domain qq.com                            
+    list domain www.qq.com                    
+    list domain v.qq.com                          
+    list domain news.qq.com                                                          
+    list domain games.qq.com                  
+                                                                                     
+config alloweddomains acfun                                                          
+    list domain acfun.tv                    
+    list domain www.acfun.tv   
 
 # Parameter: FirewallRuleSet
 # Default: none
@@ -206,6 +227,9 @@ config authserver serv_blabla
 # Groups a number of FirewallRule statements together.
 # Note: DO NOT modify $name(global, known_users, etc) as it is hard-coded
 
+# Rule Set: global
+# 
+# Used for rules to be applied to all other rulesets except locked.
 config firewallruleset global
     # firewallrule (block|drop|allow|log|ulog) [(tcp|udp|icmp) [port X]] [to IP/CIDR]
 
@@ -256,3 +280,6 @@ config firewallruleset unknown_users
 # Rule Set: locked-users - Not currently used
 config firewallruleset locked_users
     list rule "block to 0.0.0.0/0"
+
+
+

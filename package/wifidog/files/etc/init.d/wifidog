@@ -132,6 +132,60 @@ wifidog_add_firewallruleset(){
 	echo "}" >> $CONFFILE
 }
 
+#  Note: require module ipset,  kmod-ipt-ipset, dnsmasq-full
+DNSMASQ_WIFIDOG_FILE=/var/etc/dnsmasq.d/wifidog.conf
+ACTU_DNSMASQ_WIFIDOG_FILE=/etc/dnsmasq.d/wifidog.conf
+DNSMASQ_SYM_IPSET=wifidog
+wifidog_add_alloweddomains(){
+	echo "[wifidog]alloweddomains - patching for $1 domain set..."
+
+	local alloweddomains domain
+	local resolver=114.114.114.114
+
+	config_get alloweddomains $1 domain
+	
+	for domain in $alloweddomains; do
+		[ -n "$domain" ] && echo "server=/$domain/$resolver" >>  $DNSMASQ_WIFIDOG
+		[ -n "$domain" ] && echo "ipset=/$domain/$DNSMASQ_SYM_IPSET" >> $DNSMASQ_WIFIDOG
+		# [ -n "$domain" ] && iptables -t nat -A WiFiDog_br-lan_Global -m string --string "$domain" --algo bm -j ACCEPT
+		# [ -n "$domain" ] && iptables -t filter -A WiFiDog_br-lan_Global -m string --string "$domain" --algo bm -j ACCEPT
+		# [ -n "$domain" ] && iptables -t nat -A WiFiDog_br-lan_Global -d $domain -j ACCEPT
+		# [ -n "$domain" ] && iptables -t filter -A WiFiDog_br-lan_Global -d "$domain" -j ACCEPT
+	done
+}
+
+wifidog_alloweddomains_patch(){
+	
+	ipset destroy $DNSMASQ_SYM_IPSET
+	ipset create $DNSMASQ_SYM_IPSET iphash
+	
+	sleep 3s
+	
+	echo "[wifidog]alloweddomains - Patching..."
+	echo "[wifidog]alloweddomains - Required kernel: kmod-ipt-ipset; package: ipset dnsmasq-full"
+	
+	iptables -t nat -A WiFiDog_br-lan_Global -m set --match-set $DNSMASQ_SYM_IPSET dst,src -j ACCEPT
+	iptables -t filter -A WiFiDog_br-lan_Global -m set --match-set $DNSMASQ_SYM_IPSET dst,src -j ACCEPT
+
+	rm -f $DNSMASQ_WIFIDOG_FILE
+	touch $DNSMASQ_WIFIDOG_FILE
+	ln -nsf $DNSMASQ_WIFIDOG_FILE $ACTU_DNSMASQ_WIFIDOG_FILE
+
+	config_foreach wifidog_add_alloweddomains alloweddomains
+	
+	/etc/init.d/dnsmasq restart 
+	
+	echo "[wifidog]alloweddomains - Patched."
+}
+
+wifidog_alloweddomains_unpatch(){
+	echo "[wifidog]alloweddomains - Unpatching..."
+	ipset destroy $DNSMASQ_SYM_IPSET
+	rm -f $ACTU_DNSMASQ_WIFIDOG_FILE
+	/etc/init.d/dnsmasq restart 
+	echo "[wifidog]alloweddomains - Unpatched."
+}
+
 start() {
 
 	wifidog_symln_conffile_init
@@ -143,6 +197,8 @@ start() {
 
 	$PROG start
 
+	wifidog_alloweddomains_patch
+
 	wifidog_symln_conffile_rm
 }
 
@@ -150,6 +206,7 @@ start() {
 
 stop() {
 	$PROG stop
+	wifidog_alloweddomains_unpatch()
 }
 
 status() {
