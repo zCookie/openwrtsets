@@ -208,7 +208,7 @@ start() {
 
 stop() {
 	$PROG stop
-	wifidog_alloweddomains_unpatch()
+	wifidog_alloweddomains_unpatch
 }
 
 status() {

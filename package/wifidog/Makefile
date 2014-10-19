@@ -45,6 +45,8 @@ define Package/wifidog/install
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libhttpd.so* $(1)/usr/lib/
 
 	$(INSTALL_DIR) $(1)/etc
+
+	$(INSTALL_DIR) $(1)/etc/config
 	$(INSTALL_DATA) ./files/etc/config/wifidog $(1)/etc/config/wifidog
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/wifidog-msg.html $(1)/etc/wifidog-msg.html
 	
