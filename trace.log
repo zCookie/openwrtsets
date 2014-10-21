@@ -1,0 +1,15 @@
+
+[20141021]
+	openwrt.rt2x00.bug
+		status: unsolved
+		description:
+			rt2x00queue_write_tx_frame: 
+			Error - Arrived at non-free entry in thenon-full queue 2
+		todo: watched for bugfix
+		related:
+			http://rt2x00.serialmonkey.com/pipermail/users_rt2x00.serialmonkey.com/2011-June/003932.html
+			http://rt2x00.serialmonkey.com/pipermail/users_rt2x00.serialmonkey.com/2013-October/006409.html
+			http://marc.info/?l=linux-wireless&m=137992749815360&w=2
+			http://www.right.com.cn/forum/thread-146943-1-1.html
+			http://wireless.kernel.org/en/developers/todo-list
+
