@@ -172,6 +172,8 @@ wifidog_alloweddomains_patch(){
 	ln -nsf $DNSMASQ_WIFIDOG_FILE $ACTU_DNSMASQ_WIFIDOG_FILE
 
 	config_foreach wifidog_add_alloweddomains alloweddomains
+	
+	echo "[wifidog]alloweddomains - restarting dnsmasq..."
 	/etc/init.d/dnsmasq restart
 	
 	echo "[wifidog]alloweddomains - Patched."
@@ -179,11 +181,9 @@ wifidog_alloweddomains_patch(){
 
 wifidog_alloweddomains_unpatch(){
 	echo "[wifidog]alloweddomains - Unpatching..."
-	ipset destroy $DNSMASQ_SYM_IPSET
 	rm -f $ACTU_DNSMASQ_WIFIDOG_FILE
-
-	sleep 3s	
-
+	rm -f $DNSMASQ_WIFIDOG_FILE
+	echo "[wifidog]alloweddomains - restarting dnsmasq..."
 	/etc/init.d/dnsmasq restart
 	echo "[wifidog]alloweddomains - Unpatched."
 }
