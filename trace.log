@@ -1,15 +1,39 @@
 
-[20141021]
-	openwrt.rt2x00.bug
-		status: unsolved
-		description:
-			rt2x00queue_write_tx_frame: 
-			Error - Arrived at non-free entry in thenon-full queue 2
-		todo: watched for bugfix
-		related:
-			http://rt2x00.serialmonkey.com/pipermail/users_rt2x00.serialmonkey.com/2011-June/003932.html
-			http://rt2x00.serialmonkey.com/pipermail/users_rt2x00.serialmonkey.com/2013-October/006409.html
-			http://marc.info/?l=linux-wireless&m=137992749815360&w=2
-			http://www.right.com.cn/forum/thread-146943-1-1.html
-			http://wireless.kernel.org/en/developers/todo-list
 
+openwrt.rt2x00.bug
+	status: unsolved
+	description:
+		rt2x00queue_write_tx_frame: 
+		Error - Arrived at non-free entry in thenon-full queue 2
+	todo: watched for bugfix
+	reference:
+		http://rt2x00.serialmonkey.com/pipermail/users_rt2x00.serialmonkey.com/2011-June/003932.html
+		http://rt2x00.serialmonkey.com/pipermail/users_rt2x00.serialmonkey.com/2013-October/006409.html
+		http://marc.info/?l=linux-wireless&m=137992749815360&w=2
+		http://www.right.com.cn/forum/thread-146943-1-1.html
+		http://wireless.kernel.org/en/developers/todo-list
+		https://bugzilla.kernel.org/show_bug.cgi?id=61621
+openwrt.mwan
+	status: Do not have multi-wan connection device for test
+	todo: 
+		Try to emphaize wifi use with 
+			AP->bridged-to-mywlan(-bridged-to-wan)?->
+			get access with d201's pwd
+	reference:
+		http://serverfault.com/questions/430459/how-to-set-a-static-route-for-an-external-ip-address
+		http://www.fclose.com/1372/setting-up-gateway-using-iptables-and-route-on-linux/
+openwrt.tcpdump
+	tcp - ssl/TLS request: encrypted message,  thus cannot find UA info
+		note: can be used for track user viewing log@ip(domain)
+	proxy
+		shadowsocks - ss-local:
+			shadowsocks-client ip port,  shadowsocks-server ip port
+			most else encrypted
+		goagent: almost same as above.
+
+
+ 递归总有一个最简单的情况——方法的第一条语句总是一个包含 return 的条件语句。
+ 递归调用总是去尝试解决一个规模更小的子问题,这样递归才能收敛到最简单的情况。在下
+面的代码中,第四个参数和第三个参数的差值一直在缩小。1.1 基础编程模型
+15
+ 递归调用的父问题和尝试解决的
